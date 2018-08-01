@@ -1,0 +1,123 @@
+<?php
+// hook_block_info
+function eatlas_mpa_bia_block_block_info() {
+	$blocks['eatlas_mpa_bia_block'] = array(
+		'info' => t('eAtlas MPA BIA Block'),
+		'cache' => DRUPAL_NO_CACHE,
+	);
+
+	return $blocks;
+}
+
+// hook_block_view
+function eatlas_mpa_bia_block_block_view($delta = '') {
+	$block = array();
+
+	switch ($delta) {
+		case 'eatlas_mpa_bia_block':
+			$block['content'] = array(
+				'#markup' => _eatlas_mpa_bia_block_get_content(),
+				'#attached' => array(
+					'js' => array(
+						drupal_get_path('module', 'eatlas_mpa_bia_block') . '/js/eatlas_mpa_bia_block.js'
+					),
+					'css' => array(
+						drupal_get_path('module', 'eatlas_mpa_bia_block') . '/css/eatlas_mpa_bia_block.css'
+					)
+				)
+			);
+
+			break;
+	}
+
+	return $block;
+}
+
+function _eatlas_mpa_bia_block_get_content() {
+	$c = NULL;
+	$node_id = isset($_GET['rsid']) ? $_GET['rsid'] : NULL;
+	$feature_id = isset($_GET['featureId']) ? $_GET['featureId'] : NULL;
+
+	$node = NULL;
+	if ($node_id) {
+		$node = node_load($node_id);
+	}
+	if (!$node) {
+		// ID of the Marine Parks Region set
+		$node_id = 27184;
+		$node = node_load($node_id);
+	}
+
+	if ($node && $feature_id) {
+		$feature = eatlas_spatial_publisher_get_feature_from_node($node, $feature_id);
+		if ($feature) {
+			$c = new EAtlas_spatial_publisher_template_context($node, $feature);
+		}
+	}
+
+	if (!$c) {
+		$c = new EAtlas_spatial_publisher_template_context($node, NULL);
+	}
+
+	$block =
+		'<div class="specie_card_block">' .
+			'<ul>' .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Sealion_Sp", "img/sealion_20p.svg", 40) .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Dugong_Sp", "img/dugong_20p.svg", 60) .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Dolphin_Sp", "img/dolphin_20p.svg") .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Turtle_Sp", "img/turtle_20p.svg", 40) .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Rivershark_Sp", "img/river-shark_20p.svg", 90) .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Seabird_Sp", "img/seabird_20p.svg") .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Shark_Sp", "img/shark_20p.svg") .
+				_eatlas_mpa_bia_block_get_specie_card_block($c, "Whale_Sp", "img/whale_20p.svg") .
+			'</ul>' .
+		'</div>';
+
+	return $block;
+}
+
+function _eatlas_mpa_bia_block_get_specie_card_block($c, $specie_id, $icon_file, $icon_width = NULL) {
+	$block = '';
+
+	if (!$c) {
+		return $block;
+	}
+
+	$specie_ids = NULL;
+	if (isset($_GET['featureId'])) {
+		$list_string = $c->get($specie_id);
+		if ($list_string) {
+			$specie_ids = explode(',', $list_string);
+		}
+	} else {
+		// TODO
+		$specie_ids = $c->getCSVCells('species', 'group', $specie_id, 'species_ID');
+	}
+
+	if ($specie_ids) {
+		$count = count($specie_ids);
+		if ($count > 0) {
+			//$icon_url = file_create_url($icon_file->uri);
+			$icon_url = file_create_url(drupal_get_path('module', 'eatlas_mpa_bia_block') . '/' . $icon_file);
+
+			foreach ($specie_ids as $specie_id) {
+				$scientific_name = $c->getCSVCell('species', 'species_ID', $specie_id, 'scientific_name', $specie_id);
+				$common_name = $c->getCSVCell('species', 'species_ID', $specie_id, 'common_name', $specie_id);
+				$layer_name = $c->getCSVCell('species', 'species_ID', $specie_id, 'layer', NULL);
+
+				$style = "background-image: url('$icon_url');";
+				if ($icon_width) {
+					$style .= " background-size: ${icon_width}px auto;";
+				}
+				if ($layer_name) {
+					$block .= '<li class="clickable" style="' . $style . '" layer="' . $layer_name . '">';
+				} else {
+					$block .= '<li style="' . $style . '">';
+				}
+				$block .= '<span class="common-name">' . $common_name . '</span> <span class="scientific-name">' . $scientific_name .'</span></li>';
+			}
+		}
+	}
+	return $block;
+}
+?>

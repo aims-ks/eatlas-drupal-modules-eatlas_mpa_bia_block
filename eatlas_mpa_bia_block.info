@@ -1,0 +1,13 @@
+name = eAtlas MPA BIA block
+description = This module add the 'eAtlas MPA BIA Block' block for the Marine Park Atlas.
+core = 7.x
+
+files[] = eatlas_mpa_bia_block.module
+
+package = eAtlas
+
+; Attributes used by the update module.
+; There fields needs to be removed if the module is migrated to Drupal.org
+project status url = "http://drupal.eatlas.org.au/modules/eatlas"
+version = "7.x-0.7"
+project = "eatlas_mpa_bia_block"
