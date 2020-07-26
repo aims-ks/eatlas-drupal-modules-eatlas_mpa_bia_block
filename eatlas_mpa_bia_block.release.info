@@ -9,4 +9,4 @@ creator = Gael Lafond
 ;   This variable is an array, one cell per element. Use "\n" for new lines.
 ;   Those properties are used with release_notes and tags.
 ;   See: https://www.drupal.org/documentation/releases/types
-Bug fixes[] = Integration with eatlas_spatial_publisher 7.x-0.46.
+Bug fixes[] = Integration with eatlas_map_client 7.x-2.1.0.

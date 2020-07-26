@@ -29,8 +29,10 @@
 							boundaryLayerIndex = layerList.length-1;
 						}
 						// Insert the layer on top, just bellow the marine park boundary layer
-						mapAPI.insertAvailableLayer(layerId, boundaryLayerIndex);
-						mapAPI.addActiveLayer(layerId);
+						mapAPI.insertAvailableLayer(layerId, boundaryLayerIndex)
+              .then(function() {
+                mapAPI.addActiveLayer(layerId);
+              });
 					}
 				}
 			});
